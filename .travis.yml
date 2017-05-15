@@ -1,0 +1,7 @@
+dist: trusty
+language: c
+sudo: required
+install: sh -e test/deps.sh
+script: make
+notifications:
+  email: lars@nocrew.org

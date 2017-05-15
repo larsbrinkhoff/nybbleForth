@@ -1,4 +1,6 @@
-Forth virtual machine, written in Forth.
+Stack machine with 4-bit instructions.
+
+There's a simulator and an assembler, both written in Forth.
 
 Internal registers
 

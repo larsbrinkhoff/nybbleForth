@@ -1,0 +1,3 @@
+[submodule "lbForth"]
+	path = lbForth
+	url = https://github.com/larsbrinkhoff/lbForth
