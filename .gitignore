@@ -1,3 +1,7 @@
 *~
+*.hex
+*.vcd
 test-*
 image
+nybble
+bench

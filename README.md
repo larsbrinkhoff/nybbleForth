@@ -1,6 +1,9 @@
+[![Build Status](https://travis-ci.org/larsbrinkhoff/nybbleForth.svg?branch=master)](https://travis-ci.org/larsbrinkhoff/nybbleForth)
+
 Stack machine with 4-bit instructions.
 
-There's a simulator and an assembler, both written in Forth.
+There's a simulator and an assembler, both written in Forth.  There's
+a hardware design written in Verilog.
 
 Internal registers
 

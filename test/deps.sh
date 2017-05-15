@@ -6,4 +6,7 @@ install_lbforth() {
     sudo make install TARGET=x86 OS=linux
 }
 
+sudo apt-get update -yqqm
+sudo apt-get install -ym iverilog
+
 (install_lbforth)
