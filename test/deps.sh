@@ -7,6 +7,11 @@ install_lbforth() {
 }
 
 sudo apt-get update -yqqm
-sudo apt-get install -ym iverilog
+
+wget https://github.com/tgingold/ghdl/releases/download/v0.33/ghdl_0.33-1ubuntu1_amd64.deb
+sudo dpkg -i ghdl_0.33-1ubuntu1_amd64.deb || echo ignore failure
+sudo apt-get install -f
+
+sudo apt-get install -ym iverilog freehdl
 
 (install_lbforth)
