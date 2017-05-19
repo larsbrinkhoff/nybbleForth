@@ -26,3 +26,5 @@ test-verilog: bench
 	vvp $< > $@
 	grep "ff undefined" $@
 
+clean:
+	rm -f *.hex *.vcd test-* image nybble bench
