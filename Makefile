@@ -20,7 +20,7 @@ image.hex: image
 	hexdump -ve '1/1 "%02x "' < $< > $@
 
 bench: test/cpu_tb.v verilog/cpu.v image.hex
-	iverilog -o $@ $<
+	iverilog -Wall -o $@ $<
 
 test-verilog: bench
 	vvp $< > $@
