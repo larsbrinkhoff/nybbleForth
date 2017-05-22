@@ -46,7 +46,7 @@ previous
 : !X0   ['] X0, !insn ;
 : X0?   here insn<> drop 0 ;
 : 0X,   X0? if X0, else ?+data insn@ 1- c+! !X0 then ;
-' 0X, to '0X
+also forth ' 0X, previous to '0X
 
 \ Write instruction fields to memory.
 : opcode,   opcode@ insn, ;

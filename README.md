@@ -2,8 +2,9 @@
 
 Stack machine with 4-bit instructions.
 
-There's a simulator and an assembler, both written in Forth.  There's
-a hardware design written in Verilog.
+There's a simulator, an assembler, a cross compiler, and a Forth
+kernel, all written in Forth.  There's a hardware design written in
+Verilog.
 
 Internal registers
 

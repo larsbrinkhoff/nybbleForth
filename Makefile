@@ -3,6 +3,9 @@ all: image check
 image: test/make-image.fth forth/asm.fth
 	echo include $< | forth
 
+kernel: forth/compiler.fth
+	echo include $< | forth
+
 check: test-asm test-cpu test-verilog
 
 test-cpu: image forth/nybble.fth
