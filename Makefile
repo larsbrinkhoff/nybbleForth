@@ -1,15 +1,15 @@
 all: image check
 
-image: test/make-image.fth asm.fth
+image: test/make-image.fth forth/asm.fth
 	echo include $< | forth
 
 check: test-asm test-cpu test-verilog
 
-test-cpu: image nybble.fth
-	echo include nybble.fth  load $<  hex start | forth > $@
+test-cpu: image forth/nybble.fth
+	echo include forth/nybble.fth  load $<  hex start | forth > $@
 	grep "FF undefined" $@
 
-test-asm: test/test-asm.fth asm.fth
+test-asm: test/test-asm.fth forth/asm.fth
 	echo include $< | forth > $@
 	grep "Assembler test: PASS" $@
 

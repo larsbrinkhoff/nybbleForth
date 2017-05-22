@@ -1,4 +1,4 @@
-require asm.fth
+require forth/asm.fth
 
 hex
 

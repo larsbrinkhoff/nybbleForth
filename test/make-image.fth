@@ -6,7 +6,7 @@ cell constant t-cell
 vocabulary image
 only forth also image definitions
 include lib/image.fth
-include asm.fth
+include forth/asm.fth
 
 target-image also assembler
 
