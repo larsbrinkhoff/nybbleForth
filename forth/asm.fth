@@ -112,6 +112,10 @@ previous also assembler definitions
 : if,   0 0branch, >mark 0insn ;
 : until,   0branch, ;
 
+: else,   ahead, swap then, ;
+: while,   swap if, ;
+: repeat,   again, then, ;
+
 \ Runtime for ;CODE.  CODE! is defined elsewhere.
 : (;code)   r> code! ;
 

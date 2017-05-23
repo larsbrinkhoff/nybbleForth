@@ -44,5 +44,9 @@ code assembler-test
    begin, +, until,         93 FE check
    +, begin, +, until,      90 93 FE check
 
+   if, else, then,          30 04 83 00 00 00 check
+   if, +, else, then,       30 05 98 00 00 30 00 check
+   if, else, +, then,       30 04 83 00 00 01 90 check
+
 end-code
 .( PASS ) cr
