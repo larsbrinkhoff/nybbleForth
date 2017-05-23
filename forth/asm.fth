@@ -89,13 +89,11 @@ previous also assembler definitions
 03 branch 0branch,
 04 0op !,
 05 0op @,
-06 0op c!,
-07 0op c@,
-08 imm lit,
-09 0op +,
-0A 0op nand,
-0B 0op >r,
-0C 0op r>,
+06 imm lit,
+07 0op +,
+08 0op nand,
+09 0op >r,
+0A 0op r>,
 
 \ Resolve jumps.
 : >mark   here ;

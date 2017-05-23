@@ -27,6 +27,7 @@ variable ip
 
 : nf-cells   csize * ;
 : nf-mask   65535 and ;
+: nf-c@   >target c@ ;
 : ext   dup 128 and if -256 or then ;
 
 \ Instructions.
@@ -36,8 +37,6 @@ variable ip
 : nf-call   2fetch  ip @ nf->r  ip ! ;
 : nf-exit   nf-r> ip ! ;
 : nf-0branch   fetch swap 0= if ext ip +! else drop then ;
-: nf-c!   >target c! ;
-: nf-c@   >target c@ ;
 : nf-!   >target  over 8 lshift over 1+ c!  c! ;
 : nf-@   dup nf-c@  swap 1+ nf-c@ >hi ;
 : nf-(literal)   2fetch ;
@@ -53,13 +52,13 @@ create instructions
   ' nf-0branch ,
   ' nf-! ,
   ' nf-@ ,
-  ' nf-c! ,
-  ' nf-c@ ,
   ' nf-(literal) ,
   ' nf-+ ,
   ' nf-nand ,
   ' nf->r ,
   ' nf-r> ,
+  ' nf-undefined ,
+  ' nf-undefined ,
   ' nf-undefined ,
   ' nf-undefined ,
   ' nf-undefined ,

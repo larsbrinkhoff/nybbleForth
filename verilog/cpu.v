@@ -53,14 +53,12 @@ module cpu (clock);
 	   3: $write("0branch ");	// Branch if zero.
 	   4: $write("! ");		// Store word.
 	   5: $write("@ ");		// Load word.
-	   6: $write("c! ");		// Store byte.
-	   7: $write("c@ ");		// Load byte.
-	   8: $write("(literal) ");	// Immediate.
-	   9: $write("+ ");		// Addition.
-	   10: $write("nand ");		// Negative conjunction.
-	   11: $write(">r ");		// Push to return stack.
-	   12: $write("r> ");		// Pop from return stack.
-	   13, 14, 15: undefined;
+	   6: $write("(literal) ");	// Immediate.
+	   7: $write("+ ");		// Addition.
+	   8: $write("nand ");		// Negative conjunction.
+	   9: $write(">r ");		// Push to return stack.
+	   10: $write("r> ");		// Pop from return stack.
+	   default: undefined;
 	 endcase
       end
    endtask
@@ -87,13 +85,11 @@ module cpu (clock);
 	  1: rstack[R-1] <= P + 2;		// call
 	  4: { memory[T+1], memory[T] } <= N;	// !
 	  5: dstack[S] <= MT;			// @
-	  6: memory[T] <= N;			// c!
-	  7: dstack[S] <= memory[T];		// c@
-	  8: dstack[S-1] <= MP;			// (literal)
-	  9: dstack[S+1] <= T + N;		// +
-	  10: dstack[S+1] <= T ~& N;		// nand
-	  11: rstack[R-1] <= T;			// >r
-	  12: dstack[S-1] <= RT;		// r>
+	  6: dstack[S-1] <= MP;			// (literal)
+	  7: dstack[S+1] <= T + N;		// +
+	  8: dstack[S+1] <= T ~& N;		// nand
+	  9: rstack[R-1] <= T;			// >r
+	  10: dstack[S-1] <= RT;		// r>
 	endcase
 
 	// Update P.
@@ -104,20 +100,20 @@ module cpu (clock);
 	       P <= P + 1 + { {8{memory[P][7]}}, memory[P] };
 	     else 
 	       P <= P + 1;
-	  8: P <= P + 2;			// (literal)
+	  6: P <= P + 2;			// (literal)
 	endcase
 
 	// Update S.
 	case (I[7:4])
-	  3, 9, 10, 11: S <= S + 1;		// 0branch, +, nand, >r
-	  4, 6:		S <= S + 2;		// !, c!
-	  8, 12:	S <= S - 1;		// (literal), r>
+	  3, 7, 8, 9:	S <= S + 1;		// 0branch, +, nand, >r
+	  4:		S <= S + 2;		// !
+	  6, 10:	S <= S - 1;		// (literal), r>
 	endcase
 
 	// Update R.
 	case (I[7:4])
-	  1, 11:	R <= R - 1;		// call, >r
-	  2, 12:	R <= R + 1;		// exit, r>
+	  1, 9:		R <= R - 1;		// call, >r
+	  2, 10:	R <= R + 1;		// exit, r>
 	endcase
 
 	// Update state.
