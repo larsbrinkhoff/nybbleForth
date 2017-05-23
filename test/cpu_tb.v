@@ -14,7 +14,7 @@ module cpu_tb();
 
    always
      begin
-	#100 clock <= ~clock;
+	#50 clock <= ~clock;
      end
 
    cpu nybble (clock);

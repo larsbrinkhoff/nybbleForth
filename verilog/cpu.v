@@ -15,7 +15,7 @@ module cpu (clock);
    reg [7:0] I = 0;		// Instruction.
    reg [3:0] S = 15;		// Data stack pointer.
    reg [3:0] R = 15;		// Return stack pointer.
-   reg state = 0;
+   reg [1:0] state = 3;
 
    // Frequently used instruction inputs.
    wire [15:0] T;		// Top of data stack.
@@ -24,11 +24,14 @@ module cpu (clock);
    wire [15:0] MT;		// Memory word at address T.
    wire [15:0] MP;		// Memory word at address P.
 
-   assign T = dstack[S];
-   assign N = dstack[S+1];
-   assign RT = rstack[R];
-   assign MT = { memory[T+1], memory[T] };
-   assign MP = { memory[P+1], memory[P] };
+   wire [3:0] opcode;
+
+   assign #5 T = dstack[S];
+   assign #5 N = dstack[S+1];
+   assign #5 RT = rstack[R];
+   assign #20 MT = { memory[T+1], memory[T] };
+   assign #20 MP = { memory[P+1], memory[P] };
+   assign opcode = I[7:4];
 
    initial
      begin
@@ -46,7 +49,7 @@ module cpu (clock);
 
    task trace;
       begin
-	 case (I[7:4])
+	 case (opcode)
 	   0: $write("noop ");		// Do nothing.
 	   1: $write("call ");		// Subroutine call.
 	   2: $write("exit ");		// Subroutine return.
@@ -63,61 +66,65 @@ module cpu (clock);
       end
    endtask
 
+   always @(posedge clock)
+     // Update state.
+     state <= (state + 1) & 2'b11;
+
    // Fetch instruction.
    always @ (posedge clock)
      begin
 	if (state == 0)
 	  begin
-	     I = memory[P];
-	     $write("\n%04x %02x ", P, I);
-	     P = P + 1;
+	     I <= #10 memory[P];
+	     P <= #1 P + 1;
 	  end
-	else
-	  I = I << 4;
+	else if (state == 2)
+	  I <= #1 I << 4;
      end
 	
    // Execute instruction.
    always @ (posedge clock)
+     if (state == 1 || state == 3)
      begin
+	if (state == 1)
+	  $write("\n%04x %02x ", P, I);
 	trace;
 
-	case (I[7:4])
-	  1: rstack[R-1] <= P + 2;		// call
-	  4: { memory[T+1], memory[T] } <= N;	// !
-	  5: dstack[S] <= MT;			// @
-	  6: dstack[S-1] <= MP;			// (literal)
-	  7: dstack[S+1] <= T + N;		// +
-	  8: dstack[S+1] <= T ~& N;		// nand
-	  9: rstack[R-1] <= T;			// >r
-	  10: dstack[S-1] <= RT;		// r>
+	case (opcode)
+	  1: #5 rstack[R-1] <= #1 P + 2;	// call
+	  4: #20 { memory[T+1], memory[T] } <= N;	// !
+	  5: #5 dstack[S] <= MT;		// @
+	  6: #5 dstack[S-1] <=  MP;		// (literal)
+	  7: #5 dstack[S+1] <= #1 T + N;		// +
+	  8: #5 dstack[S+1] <= #1 T ~& N;		// nand
+	  9: #5 rstack[R-1] <= T;		// >r
+	  10: #5 dstack[S-1] <= RT;		// r>
 	endcase
 
 	// Update P.
-	case (I[7:4])
-	  1: P <= MP;				// call
-	  2: P <= RT;				// exit
+	case (opcode)
+	  1: P <= MP;			// call
+	  2: P <= RT;			// exit
 	  3: if (T == 0)			// 0branch
-	       P <= P + 1 + { {8{memory[P][7]}}, memory[P] };
+	       P <= #11 P + 1 + { {8{memory[P][7]}}, memory[P] };
 	     else 
-	       P <= P + 1;
-	  6: P <= P + 2;			// (literal)
+	       P <= #1 P + 1;
+	  6: P <= #1 P + 2;			// (literal)
 	endcase
 
 	// Update S.
-	case (I[7:4])
-	  3, 7, 8, 9:	S <= S + 1;		// 0branch, +, nand, >r
-	  4:		S <= S + 2;		// !
-	  6, 10:	S <= S - 1;		// (literal), r>
+	case (opcode)
+	  3, 7, 8, 9:	S <= #1 S + 1;		// 0branch, +, nand, >r
+	  4:		S <= #1 S + 2;		// !
+	  6, 10:	S <= #1 S - 1;		// (literal), r>
 	endcase
 
 	// Update R.
-	case (I[7:4])
-	  1, 9:		R <= R - 1;		// call, >r
-	  2, 10:	R <= R + 1;		// exit, r>
+	case (opcode)
+	  1, 9:		R <= #1 R - 1;		// call, >r
+	  2, 10:	R <= #1 R + 1;		// exit, r>
 	endcase
 
-	// Update state.
-	state <= ~state;
      end
 
 endmodule
