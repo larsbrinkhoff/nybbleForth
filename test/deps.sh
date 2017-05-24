@@ -7,6 +7,6 @@ install_lbforth() {
 }
 
 sudo apt-get update -yqqm
-sudo apt-get install -ym iverilog
+sudo apt-get install -ym iverilog verilator
 
 (install_lbforth)

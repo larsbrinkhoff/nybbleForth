@@ -5,3 +5,4 @@ test-*
 image
 nybble
 bench
+obj_dir
