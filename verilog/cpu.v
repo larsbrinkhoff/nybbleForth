@@ -34,10 +34,7 @@ module cpu (clock);
    assign opcode = I[7:4];
 
    initial
-     begin
-	$readmemh ("image.hex", memory);
-	$dumpvars;
-     end
+     $readmemh ("image.hex", memory);
 
    task undefined;
       begin
