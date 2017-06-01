@@ -1,9 +1,17 @@
 `timescale 1ns / 1ps
 
-module cpu (clock);
+module cpu (clock, wen, ren,
+	    waddr, raddr,
+	    wdata, rdata);
 
-   input clock;
-   wire clock;
+
+   input wire clock;
+
+   output reg wen, ren;
+   output reg [15:0] waddr, raddr;
+   output reg [7:0] wdata;
+
+   input wire [7:0] rdata;
 
    // Memories.
    reg [15:0] dstack[0:15];	// Data stack.
