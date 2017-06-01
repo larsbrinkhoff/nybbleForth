@@ -64,64 +64,54 @@ module cpu (clock);
    endtask
 
    always @ (posedge clock)
-     // Update state.
-     state <= (state + 1) & 2'b11;
-
-   // Fetch instruction.
-   always @ (posedge clock)
      begin
-	if (state == 0)
-	  begin
-	     I <= #10 memory[P];
-	     P <= #1 P + 1;
-	  end
-	else if (state == 2)
-	  I <= #1 I << 4;
+	// Update state.
+	state <= (state + 1) & 2'b11;
+
+	case (state)
+	  0: { I, P } <= #10 { memory[P], P + 16'b1 };	// Fetch instruction.
+	  2: I <= #1 I << 4;
+	  1, 3:
+	    begin
+	       if (state == 1)
+		 $write("\n%04x %02x ", P, I);
+	       trace;
+
+	       case (opcode)
+		 1: #5 rstack[R-1] <= #1 P + 2;		// call
+		 4: #20 { memory[T+1], memory[T] } <= N;// !
+		 5: #5 dstack[S] <= MT;			// @
+		 6: #5 dstack[S-1] <=  MP;		// (literal)
+		 7: #5 dstack[S+1] <= #1 T + N;		// +
+		 8: #5 dstack[S+1] <= #1 T ~& N;	// nand
+		 9: #5 rstack[R-1] <= T;		// >r
+		 10: #5 dstack[S-1] <= RT;		// r>
+	       endcase
+
+	       case (opcode)
+		 1: P <= MP;			// call
+		 2: P <= RT;			// exit
+		 3: if (T == 0)			// 0branch
+	              P <= #11 P + 1 + { {8{memory[P][7]}}, memory[P] };
+		    else 
+		      P <= #1 P + 1;
+		 6: P <= #1 P + 2;		// (literal)
+	       endcase
+
+	       // Update S.
+	       case (opcode)
+		 3, 7, 8, 9:	S <= #1 S + 1;	// 0branch, +, nand, >r
+		 4:		S <= #1 S + 2;	// !
+		 6, 10:		S <= #1 S - 1;	// (literal), r>
+	       endcase
+
+	       // Update R.
+	       case (opcode)
+		 1, 9:		R <= #1 R - 1;	// call, >r
+		 2, 10:		R <= #1 R + 1;	// exit, r>
+	       endcase
+	    end
+	endcase
      end
-
-   // Execute instruction.
-   always @ (posedge clock)
-     if (state == 1 || state == 3)
-       begin
-	  if (state == 1)
-	    $write("\n%04x %02x ", P, I);
-	  trace;
-
-	  case (opcode)
-	    1: #5 rstack[R-1] <= #1 P + 2;	// call
-	    4: #20 { memory[T+1], memory[T] } <= N;	// !
-	    5: #5 dstack[S] <= MT;		// @
-	    6: #5 dstack[S-1] <=  MP;		// (literal)
-	    7: #5 dstack[S+1] <= #1 T + N;	// +
-	    8: #5 dstack[S+1] <= #1 T ~& N;	// nand
-	    9: #5 rstack[R-1] <= T;		// >r
-	    10: #5 dstack[S-1] <= RT;		// r>
-	  endcase
-
-	  // Update P.
-	  case (opcode)
-	    1: P <= MP;				// call
-	    2: P <= RT;				// exit
-	    3: if (T == 0)			// 0branch
-	         P <= #11 P + 1 + { {8{memory[P][7]}}, memory[P] };
-	       else 
-		 P <= #1 P + 1;
-	    6: P <= #1 P + 2;			// (literal)
-	  endcase
-
-	  // Update S.
-	  case (opcode)
-	    3, 7, 8, 9:	S <= #1 S + 1;		// 0branch, +, nand, >r
-	    4:		S <= #1 S + 2;		// !
-	    6, 10:	S <= #1 S - 1;		// (literal), r>
-	  endcase
-
-	  // Update R.
-	  case (opcode)
-	    1, 9:	R <= #1 R - 1;		// call, >r
-	    2, 10:	R <= #1 R + 1;		// exit, r>
-	  endcase
-
-       end
 
 endmodule
