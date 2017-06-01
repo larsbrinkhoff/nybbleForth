@@ -15,7 +15,7 @@ module cpu (clock);
    reg [7:0] I = 0;		// Instruction.
    reg [3:0] S = 15;		// Data stack pointer.
    reg [3:0] R = 15;		// Return stack pointer.
-   reg [1:0] state = 3;
+   reg [1:0] state = 2;
 
    // Frequently used instruction inputs.
    wire [15:0] T;		// Top of data stack.
@@ -66,12 +66,14 @@ module cpu (clock);
    always @ (posedge clock)
      begin
 	// Update state.
-	state <= (state + 1) & 2'b11;
+	if (state == 2)
+	  state <= 0;
+	else
+	  state <= state + 1;
 
 	case (state)
 	  0: { I, P } <= #10 { memory[P], P + 16'b1 };	// Fetch instruction.
-	  2: I <= #1 I << 4;
-	  1, 3:
+	  1, 2:
 	    begin
 	       if (state == 1)
 		 $write("\n%04x %02x ", P, I);
@@ -110,6 +112,8 @@ module cpu (clock);
 		 1, 9:		R <= #1 R - 1;	// call, >r
 		 2, 10:		R <= #1 R + 1;	// exit, r>
 	       endcase
+
+	       I <= #1 I << 4;
 	    end
 	endcase
      end
