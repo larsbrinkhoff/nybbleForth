@@ -40,4 +40,9 @@ test-verilator: obj_dir/Vcpu image.hex
 	grep "ff undefined" $@
 
 clean:
-	rm -rf *.hex *.vcd test-* image nybble bench obj_dir
+	rm -rf *.hex *.vcd test-* *.blif image nybble bench
+
+yosys:	nybble.blif
+
+nybble.blif: verilog/cpu.v
+	yosys -p "read_verilog $<; synth_ice40 -blif $@" > yosys.log
