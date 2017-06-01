@@ -4,6 +4,7 @@
 module cpu_tb();
 
    reg clock;
+   wire out;
 
    initial
      begin
@@ -17,6 +18,6 @@ module cpu_tb();
 	#50 clock <= ~clock;
      end
 
-   cpu nybble (clock);
+   cpu nybble (clock, out);
 
 endmodule

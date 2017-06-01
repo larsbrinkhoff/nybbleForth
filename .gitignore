@@ -1,6 +1,8 @@
 *~
 *.hex
 *.vcd
+*.blif
+*.log
 test-*
 image
 nybble

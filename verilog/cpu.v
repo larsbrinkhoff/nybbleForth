@@ -1,14 +1,16 @@
 `timescale 1ns / 1ps
 
-module cpu (clock);
+module cpu (clock, out);
 
    input clock;
    wire clock;
 
+   output reg out = 0;
+
    // Memories.
    reg [15:0] dstack[0:15];	// Data stack.
    reg [15:0] rstack[0:15];	// Return stack.
-   reg [7:0] memory[0:4095];	// Main memory.
+   reg [7:0] memory[0:0];	// Main memory.
 
    // Internal registers.
    reg [15:0] P = 0;		// Program pointer.
@@ -45,7 +47,7 @@ module cpu (clock);
       begin
 	 $write("undefined ");
 	 $display("\nHALTED");
-	 $finish;
+	 //$finish;
       end
    endtask
 
@@ -136,6 +138,7 @@ module cpu (clock);
 	T <= next_T;
 
 	casez (state_opcode)
+	  5'b11101: out <= 1;
 	  5'b0????: ;
 	  5'b101??: dstack[S-1] <= T;		// (literal), r>
 	  5'b111??: { memory[T+1], memory[T] } <= N; // !
