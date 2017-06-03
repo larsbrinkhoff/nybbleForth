@@ -7,6 +7,9 @@ module ram (input clock, wen, ren,
 
    reg [7:0] mem [0:4095];
 
+   initial
+     $readmemh ("image.hex", mem);
+
    always @(posedge clock)
      begin
 	if (wen)

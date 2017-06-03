@@ -4,14 +4,13 @@ module cpu (clock, wen, ren,
 	    waddr, raddr,
 	    wdata, rdata);
 
-
    input wire clock;
-
-   output reg wen, ren;
-   output reg [15:0] waddr, raddr;
-   output reg [7:0] wdata;
-
    input wire [7:0] rdata;
+
+   output reg ren;
+   output reg wen;
+   output reg [15:0] raddr, waddr;
+   output reg [7:0] wdata;
 
    // Memories.
    reg [15:0] dstack[0:15];	// Data stack.
