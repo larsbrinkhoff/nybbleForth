@@ -46,3 +46,17 @@ yosys:	nybble.blif
 
 nybble.blif: verilog/cpu.v
 	yosys -p "read_verilog $<; synth_ice40 -blif $@" > yosys.log
+
+test:	test.bin
+
+test.blif: verilog/test.v
+	yosys -p "read_verilog $<; synth_ice40 -blif $@" > yosys.log
+
+test.txt: test.blif constraints.pcf
+	arachne-pnr -d 1k -p constraints.pcf -P vq100 -o $@ $<
+
+test.bin: test.txt
+	icepack $< $@
+
+upload: test.bin
+	sudo iceprog $<
