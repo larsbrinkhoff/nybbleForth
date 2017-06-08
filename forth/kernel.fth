@@ -3,10 +3,10 @@
 \ The compiler implements control flow and literals.  Everything else
 \ must be built from these primitives: ! @ + nand >r r>
 
-variable  temp
-: drop    temp ! ;
+: drop    if then ;
 : 2drop   + drop ;
 
+variable  temp
 : swap   >r temp ! r> temp @ ;
 : over   >r temp ! temp @ r> temp @ ;
 : rot    >r swap r> swap ;
