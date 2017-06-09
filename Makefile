@@ -44,8 +44,11 @@ clean:
 
 yosys:	nybble.blif
 
-nybble.blif: verilog/cpu.v
+nybble.blif: verilog/top.v verilog/cpu.v
 	yosys -p "read_verilog $<; synth_ice40 -blif $@" > yosys.log
+
+nybble.txt: nybble.blif constraints.pcf
+	arachne-pnr -d 1k -p constraints.pcf -P vq100 -o $@ $<
 
 test:	test.bin
 
@@ -60,3 +63,6 @@ test.bin: test.txt
 
 upload: test.bin
 	sudo iceprog $<
+
+# icetime -t -p constraints.pcf -d hx1k nybble.txt
+# 46 MHz
