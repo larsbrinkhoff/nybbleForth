@@ -16,21 +16,22 @@ Internal registers
 | R    |   4  | Return stack pointer
 
 The machine has 11 instructions, encoded two per byte.  Some have an 8
-or 16-bit operand.
+or 16-bit operand.  The encoding is carefully arranged to reduce logic
+in a hardware implementation.
 
 | Code | Name | Size | Operation
 | ---- | ---- | ---- | ---------
 |  0   | noop |    4 | No operation
-|  1   | call | 4+16 | Push P to return stack, fetch a word and jump
-|  2   | exit |    4  | Pop P from return stack
-|  3   | 0branch | 4+8 | Fetch a byte and add to P if popped data stack is zero
-|  4   | ! |       4 | Store word into memory
-|  5   | @ |       4 | Load word from memory
-|  6   | (literal) | 4+16 | Fetch a word and push to stack
-|  7   | + |       4 | Add top two items on data stack
-|  8   | nand |    4 | Inverted conjunction of the two top items on data stack
-|  9   | >r |      4 | Pop data stack and push to return stack
-| 10   | r> |      4 | Pop return stack and push to data stack
+|  1   | @    |    4 | Load word from memory
+|  2   | call | 4+16 | Push P to return stack, fetch a word and jump
+|  3   | exit |    4 | Pop P from return stack
+|  4   | (literal) | 4+16 | Fetch a word and push to stack
+|  7   | r>   |    4 | Pop return stack and push to data stack
+|  8   | +    |    4 | Add top two items on data stack
+|  9   | nand |    4 | Inverted conjunction of the two top items on data stack
+| 10   | >r   |    4 | Pop data stack and push to return stack
+| 11   | 0branch | 4+8 | Fetch a byte and add to P if popped data stack is zero
+| 12   | !    |    4 | Store word into memory
 
 The word size is 16 bits, but this is easy to reconfigure.
 

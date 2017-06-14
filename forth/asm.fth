@@ -84,16 +84,16 @@ format: imm   absolute ;
 \ Instruction mnemonics.
 previous also assembler definitions
 00 0op nop,
-01 imm call,
-02 0op exit,
-03 branch 0branch,
-04 0op !,
-05 0op @,
-06 imm lit,
-07 0op +,
-08 0op nand,
-09 0op >r,
-0A 0op r>,
+01 0op @,
+02 imm call,
+03 0op exit,
+04 imm lit,
+07 0op r>,
+08 0op +,
+09 0op nand,
+0A 0op >r,
+0B branch 0branch,
+0C 0op !,
 
 \ Resolve jumps.
 : >mark   here ;

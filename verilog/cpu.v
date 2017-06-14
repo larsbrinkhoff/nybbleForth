@@ -54,59 +54,65 @@ module cpu (clock);
       begin
 	 case (opcode)
 	   0: $write("noop ");		// Do nothing.
-	   1: $write("call ");		// Subroutine call.
-	   2: $write("exit ");		// Subroutine return.
-	   3: $write("0branch ");	// Branch if zero.
-	   4: $write("! ");		// Store word.
-	   5: $write("@ ");		// Load word.
-	   6: $write("(literal) ");	// Immediate.
-	   7: $write("+ ");		// Addition.
-	   8: $write("nand ");		// Negative conjunction.
-	   9: $write(">r ");		// Push to return stack.
-	   10: $write("r> ");		// Pop from return stack.
+	   1: $write("@ ");		// Load word.
+	   2: $write("call ");		// Subroutine call.
+	   3: $write("exit ");		// Subroutine return.
+	   4: $write("(literal) ");	// Immediate.
+	   7: $write("r> ");		// Pop from return stack.
+	   8: $write("+ ");		// Addition.
+	   9: $write("nand ");		// Negative conjunction.
+	   10: $write(">r ");		// Push to return stack.
+	   11: $write("0branch ");	// Branch if zero.
+	   12: $write("! ");		// Store word.
 	   default: undefined;
 	 endcase
       end
    endtask
 
+   // This instruction set is laid out to simplify decoding.  The two
+   // most significant bits directly encode the data stack pointer
+   // effect.  The return stack pointer effect mostly comes from the
+   // two least significant bits.  Some instructions have been placed
+   // in particular locations to reduce logic.
+
    always @*
      case (opcode)
-       1: 	result = P + 2;		// call
-       4: 	result = N;		// !
-       5: 	result = MT;		// @
-       6: 	result = MP;		// (literal)
-       7: 	result = T + N;		// +
-       8: 	result = T ~& N;	// nand
-       9: 	result = T;		// >r
-       10:	result = RT;		// r>
+       1: 	result = MT;		// @
+       2: 	result = P + 2;		// call
+       4: 	result = MP;		// (literal)
+       7:	result = RT;		// r>
+       8: 	result = T + N;		// +
+       9: 	result = T ~& N;	// nand
+       10: 	result = T;		// >r
+       12: 	result = N;		// !
        default: result = 16'bx;
      endcase
 
    always @*
-     case (opcode)
-       3, 7, 8, 9: next_S = S + 1;	// 0branch, +, nand, >r
-       4:	   next_S = S + 2;	// !
-       6, 10:	   next_S = S - 1;	// (literal), r>
-       default:    next_S = S;
+     case (opcode[3:2])
+       2'b00: next_S = S;		// noop, @, call, exit
+       2'b01: next_S = S - 1;		// (literal), r>
+       2'b10: next_S = S + 1;		// +, nand, >r, 0branch
+       2'b11: next_S = S + 2;		// !
      endcase
 
    always @*
-     case (opcode)
-       1, 9:	next_R = R - 1;		// call, >r
-       2, 10:	next_R = R + 1;		// exit, r>
+     casez (opcode)
+       4'b??10: next_R = R - 1;		// call, >r
+       4'b0?11: next_R = R + 1;		// exit, r>
        default: next_R = R;
      endcase
 
    always @*
      casez (state_opcode)
        5'b0????: next_P = P + 1;
-       5'b10001: next_P = MP;		// call
-       5'b10010: next_P = RT;		// exit
-       5'b10011: if (T == 0)		// 0branch
+       5'b10010: next_P = MP;		// call
+       5'b10011: next_P = RT;		// exit
+       5'b10100: next_P = P + 2;	// (literal)
+       5'b11011: if (T == 0)		// 0branch
 	            #10 next_P = P + 1 + { {8{memory[P][7]}}, memory[P] };
                   else 
 	            next_P = P + 1;
-       5'b10110: next_P = P + 2;	// (literal)
        default:  next_P = P;
      endcase
 
@@ -132,11 +138,11 @@ module cpu (clock);
 
 	casez (state_opcode)
 	  5'b0????: ;
-	  5'b10001, 5'b11001: rstack[R-1] <= result;	// call, >r
-	  5'b10100: { memory[T+1], memory[T] } <= result;// !
-	  5'b10101: dstack[S] <= result;		// @
-	  5'b10110, 5'b11010: dstack[S-1] <= result;	// (literal), r>
-	  5'b10111, 5'b11000: dstack[S+1] <= result;	// +, nand
+	  5'b10001: dstack[S] <= result;	// @
+	  5'b101??: dstack[S-1] <= result;	// (literal), r>
+	  5'b1100?: dstack[S+1] <= result;	// +, nand
+	  5'b111??: { memory[T+1], memory[T] } <= result;// !
+	  5'b1??10: rstack[R-1] <= result;	// call, >r
 	endcase
      end
 
