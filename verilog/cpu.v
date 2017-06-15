@@ -12,17 +12,17 @@ module cpu (clock);
 
    // Internal registers.
    reg [15:0] P = 0;		// Program pointer.
+   reg [15:0] T = 0;		// Top of data stack.
    reg [7:0] I = 0;		// Instruction.
    reg [3:0] S = 15;		// Data stack pointer.
    reg [3:0] R = 15;		// Return stack pointer.
 
    reg [1:0] state = 2;
-   reg [15:0] result, next_P;
+   reg [15:0] next_P, next_T;
    reg [3:0] next_S, next_R;
    reg [7:0] next_I;
 
    // Frequently used instruction inputs.
-   wire [15:0] T;		// Top of data stack.
    wire [15:0] N;		// Next item on data stack.
    wire [15:0] RT;		// Top of return stack.
    wire [15:0] MT;		// Memory word at address T.
@@ -31,8 +31,7 @@ module cpu (clock);
    wire [3:0] opcode;
    wire [4:0] state_opcode;
 
-   assign #5 T = dstack[S];
-   assign #5 N = dstack[S+1];
+   assign #5 N = dstack[S];
    assign #5 RT = rstack[R];
    assign #20 MT = { memory[T+1], memory[T] };
    assign #20 MP = { memory[P+1], memory[P] };
@@ -76,24 +75,23 @@ module cpu (clock);
    // in particular locations to reduce logic.
 
    always @*
-     case (opcode)
-       1: 	result = MT;		// @
-       2: 	result = P + 2;		// call
-       4: 	result = MP;		// (literal)
-       7:	result = RT;		// r>
-       8: 	result = T + N;		// +
-       9: 	result = T ~& N;	// nand
-       10: 	result = T;		// >r
-       12: 	result = N;		// !
-       default: result = 16'bx;
-     endcase
-
-   always @*
      case (opcode[3:2])
        2'b00: next_S = S;		// noop, @, call, exit
        2'b01: next_S = S - 1;		// (literal), r>
        2'b10: next_S = S + 1;		// +, nand, >r, 0branch
        2'b11: next_S = S + 2;		// !
+     endcase
+
+   always @*
+     case (opcode)
+       1: 	next_T = MT;		// @
+       4: 	next_T = MP;		// (literal)
+       7:	next_T = RT;		// r>
+       8: 	next_T = T + N;		// +
+       9: 	next_T = T ~& N;	// nand
+       10, 11:	next_T = N;		// >r, 0branch
+       12: 	next_T = dstack[S+1];	// !
+       default: next_T = T;
      endcase
 
    always @*
@@ -135,14 +133,14 @@ module cpu (clock);
 	I <= next_I;
 	S <= next_S;
 	R <= next_R;
+	T <= next_T;
 
 	casez (state_opcode)
 	  5'b0????: ;
-	  5'b10001: dstack[S] <= result;	// @
-	  5'b101??: dstack[S-1] <= result;	// (literal), r>
-	  5'b1100?: dstack[S+1] <= result;	// +, nand
-	  5'b111??: { memory[T+1], memory[T] } <= result;// !
-	  5'b1??10: rstack[R-1] <= result;	// call, >r
+	  5'b101??: dstack[S-1] <= T;		// (literal), r>
+	  5'b111??: { memory[T+1], memory[T] } <= N; // !
+	  5'b10010: rstack[R-1] <= P + 2;	// call
+	  5'b11010: rstack[R-1] <= T;		// >r
 	endcase
      end
 
