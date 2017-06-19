@@ -46,3 +46,6 @@ yosys:	nybble.blif
 
 nybble.blif: verilog/cpu.v
 	yosys -p "read_verilog $<; synth_ice40 -blif $@" > yosys.log
+
+x: verilog/x.v
+	yosys -p "read_verilog $<; synth_ice40 -blif $@" > x.log

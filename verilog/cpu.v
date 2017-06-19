@@ -89,10 +89,10 @@ module cpu (clock, out);
        1: 	next_T = MT;		// @
        4: 	next_T = MP;		// (literal)
        7:	next_T = RT;		// r>
-       8: 	next_T = T + N;		// +
-       9: 	next_T = T ~& N;	// nand
-       10, 11:	next_T = N;		// >r, 0branch
-       12: 	next_T = dstack[S+1];	// !
+       8: 	next_T = T + dstack[S];		// +
+       9: 	next_T = T ~& dstack[S];	// nand
+       10, 11:	next_T = dstack[S];		// >r, 0branch
+//       12: 	next_T = dstack[S+1];	// !
        default: next_T = T;
      endcase
 
