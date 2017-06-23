@@ -13,17 +13,17 @@ module cpu (clock);
    // Internal registers.
    reg [15:0] P = 0;		// Program pointer.
    reg [15:0] T = 0;		// Top of data stack.
+   reg [15:0] N = 0;		// Next on data stack.
    reg [7:0] I = 0;		// Instruction.
    reg [3:0] S = 15;		// Data stack pointer.
    reg [3:0] R = 15;		// Return stack pointer.
 
    reg [1:0] state = 2;
-   reg [15:0] next_P, next_T;
+   reg [15:0] next_P, next_T, next_N;
    reg [3:0] next_S, next_R;
    reg [7:0] next_I;
 
    // Frequently used instruction inputs.
-   wire [15:0] N;		// Next item on data stack.
    wire [15:0] RT;		// Top of return stack.
    wire [15:0] MT;		// Memory word at address T.
    wire [15:0] MP;		// Memory word at address P.
@@ -31,7 +31,6 @@ module cpu (clock);
    wire [3:0] opcode;
    wire [4:0] state_opcode;
 
-   assign #5 N = dstack[S];
    assign #5 RT = rstack[R];
    assign #20 MT = { memory[T+1], memory[T] };
    assign #20 MP = { memory[P+1], memory[P] };
@@ -90,8 +89,16 @@ module cpu (clock);
        8: 	next_T = T + N;		// +
        9: 	next_T = T ~& N;	// nand
        10, 11:	next_T = N;		// >r, 0branch
-       12: 	next_T = dstack[S+1];	// !
+       12: 	next_T = dstack[S];	// !
        default: next_T = T;
+     endcase
+
+   always @*
+     case (opcode[3:2])
+       2'b00: next_N = N;		// noop, @, call, exit
+       2'b01: next_N = T;		// (literal), r>
+       2'b10: next_N = dstack[S];	// +, nand, >r, 0branch
+       2'b11: next_N = dstack[S+1];	// !
      endcase
 
    always @*
@@ -134,10 +141,11 @@ module cpu (clock);
 	S <= next_S;
 	R <= next_R;
 	T <= next_T;
+	N <= next_N;
 
 	casez (state_opcode)
 	  5'b0????: ;
-	  5'b101??: dstack[S-1] <= T;		// (literal), r>
+	  5'b101??: dstack[S-1] <= N;		// (literal), r>
 	  5'b111??: { memory[T+1], memory[T] } <= N; // !
 	  5'b10010: rstack[R-1] <= P + 2;	// call
 	  5'b11010: rstack[R-1] <= T;		// >r
