@@ -14,6 +14,10 @@ target-image also assembler
 : fail,   238 c, ;
 : success,   255 c, ;
 
+\ Macros for stack juggling.
+: drop,  4000 lit, !, ; 
+: dup,   drop, 4000 lit, @, 4000 lit, @, ;
+
 \ Let's start off with something simple.
 nop,
 
@@ -41,7 +45,7 @@ r>, -2 lit, +, if, fail, then,
 +, if, fail, then,
 
 \ Jumping backwards
--1 lit, begin, 1 lit, +, until,
+-1 lit, begin, 1 lit, +, dup, until, drop,
 
 success,
 
